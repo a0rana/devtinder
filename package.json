@@ -1,0 +1,23 @@
+{
+  "name": "devtinder",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a0rana/devtinder.git"
+  },
+  "author": "Anurag Rana",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/a0rana/devtinder/issues"
+  },
+  "homepage": "https://github.com/a0rana/devtinder#readme",
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}
