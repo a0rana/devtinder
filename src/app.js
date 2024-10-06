@@ -2,12 +2,16 @@ const express = require('express');
 
 const app = express();
 
-app.use('/test', (req, res) => {
+app.get('/test', (req, res) => {
     res.send('test');
 });
 
-app.use('/hello', (req, res) => {
+app.post('/hello', (req, res) => {
     res.send('hello');
+});
+
+app.use('/', (req, res) => {
+    res.send('slash slash slash');
 });
 
 app.listen(7777, () => {
