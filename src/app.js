@@ -14,16 +14,13 @@ connectToDatabase().then(() => {
     console.error(err.message);
 });
 
+app.use(express.json());
+
 app.post('/signup', async (req, res) => {
     try {
-        const user = new User({
-            email: 'hello@gmail.com',
-            firstName: 'hi',
-            lastName: 'hello',
-            password: '123456'
-        });
-        await user.save();
-        res.status(200).send('User created successfully.');
+        const user = new User(req.body);
+        const result = await user.save();
+        res.status(200).send('User created successfully ' + result._id);
     } catch (err) {
         res.status(400).send(err);
     }
