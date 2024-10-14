@@ -25,3 +25,31 @@ app.post('/signup', async (req, res) => {
         res.status(400).send(err);
     }
 });
+
+app.get('/user', async (req, res) => {
+    try {
+        const userEmail = req.body.email;
+        const result = await User.findOne({email: userEmail});
+        res.status(200).send(result);
+    } catch (err) {
+        res.status(400).send(err);
+    }
+});
+
+app.get('/getAllUsers', async (req, res) => {
+    try {
+        const result = await User.find();
+        res.status(200).send(result);
+    } catch (err) {
+        res.status(400).send(err);
+    }
+});
+
+app.patch('/user', async (req, res) => {
+    try {
+        const result = await User.findOneAndUpdate({email: req.body.email}, req.body, {returnDocument: 'before'});
+        res.status(200).send(result);
+    } catch (err) {
+        res.status(400).send(err);
+    }
+});
