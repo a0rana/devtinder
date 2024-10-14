@@ -53,3 +53,12 @@ app.patch('/user', async (req, res) => {
         res.status(400).send(err);
     }
 });
+
+app.delete('/user', async (req, res) => {
+    try {
+        const result = await User.findOneAndDelete({email: req.body.email});
+        res.status(200).send(result);
+    } catch (err) {
+        res.status(400).send(err);
+    }
+});
