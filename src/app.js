@@ -1,8 +1,11 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 const {connectToDatabase} = require('./config/database');
 const User = require('./models/user');
 const {validateSignupData, validateLoginData} = require('./util/validation');
+const {userAuth} = require('./middlewares/auth');
 
 const app = express();
 
@@ -17,6 +20,7 @@ connectToDatabase().then(() => {
 });
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.post('/signup', async (req, res) => {
     try {
@@ -28,49 +32,6 @@ app.post('/signup', async (req, res) => {
         res.status(200).send('User created successfully ' + result._id);
     } catch (err) {
         res.status(400).send(err.message);
-    }
-});
-
-app.get('/user', async (req, res) => {
-    try {
-        const userEmail = req.body.email;
-        const result = await User.findOne({email: userEmail});
-        res.status(200).send(result);
-    } catch (err) {
-        res.status(400).send(err);
-    }
-});
-
-app.get('/getAllUsers', async (req, res) => {
-    try {
-        const result = await User.find();
-        res.status(200).send(result);
-    } catch (err) {
-        res.status(400).send(err);
-    }
-});
-
-app.patch('/user', async (req, res) => {
-    try {
-        const ALLOWED_FIELDS = ['firstName', 'lastName', 'password', 'age', 'gender', 'photoUrl', 'skills'];
-        for (const field of Object.keys(req.body)) {
-            if (!ALLOWED_FIELDS.includes(field)) {
-                throw new Error('Field not allowed: ' + field);
-            }
-        }
-        const result = await User.findOneAndUpdate({email: req.body.email}, req.body, {returnDocument: 'before'});
-        res.status(200).send(result);
-    } catch (err) {
-        res.status(400).send(err.message);
-    }
-});
-
-app.delete('/user', async (req, res) => {
-    try {
-        const result = await User.findOneAndDelete({email: req.body.email});
-        res.status(200).send(result);
-    } catch (err) {
-        res.status(400).send(err);
     }
 });
 
@@ -86,8 +47,21 @@ app.post('/login', async (req, res) => {
         if (!isPasswordMatching) {
             throw new Error('Invalid email or password');
         }
+
+        const token = await jwt.sign({_id: user._id}, process.env.JWT_SIGN_PASSWORD, { expiresIn: '8h'});
+        res.cookie(process.env.JWT_TOKEN_NAME, token, {expires: new Date(Date.now() + 8 * 3600000)});
+
         res.status(200).send('Login is successful!');
     } catch (err) {
         res.status(400).send(err.message);
+    }
+});
+
+app.get('/profile', userAuth, async (req, res) => {
+    try {
+        const user = req.user;
+        res.send(user);
+    } catch (err) {
+        res.status(400).send(err);
     }
 });
