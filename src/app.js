@@ -1,7 +1,8 @@
 const express = require('express');
+const bcrypt = require('bcrypt');
 const {connectToDatabase} = require('./config/database');
 const User = require('./models/user');
-const validator = require('validator');
+const {validateSignupData, validateLoginData} = require('./util/validation');
 
 const app = express();
 
@@ -20,15 +21,8 @@ app.use(express.json());
 app.post('/signup', async (req, res) => {
     try {
         const data = req.body;
-        if(!validator.isEmail(data.email)) {
-            throw new Error('Email is invalid: '+ data.email);
-        }
-        if(!validator.isURL(data.photoUrl)) {
-            throw new Error('Photo URL is invalid: '+ data.photoUrl);
-        }
-        if(data.skills?.length > 5) {
-            throw new Error('Skills should be less than five');
-        }
+        validateSignupData(data);
+        data.password = await bcrypt.hash(req.body.password, 10);
         const user = new User(data);
         const result = await user.save();
         res.status(200).send('User created successfully ' + result._id);
@@ -59,8 +53,8 @@ app.get('/getAllUsers', async (req, res) => {
 app.patch('/user', async (req, res) => {
     try {
         const ALLOWED_FIELDS = ['firstName', 'lastName', 'password', 'age', 'gender', 'photoUrl', 'skills'];
-        for(const field of Object.keys(req.body)){
-            if(!ALLOWED_FIELDS.includes(field)){
+        for (const field of Object.keys(req.body)) {
+            if (!ALLOWED_FIELDS.includes(field)) {
                 throw new Error('Field not allowed: ' + field);
             }
         }
@@ -77,5 +71,23 @@ app.delete('/user', async (req, res) => {
         res.status(200).send(result);
     } catch (err) {
         res.status(400).send(err);
+    }
+});
+
+app.post('/login', async (req, res) => {
+    try {
+        const data = req.body;
+        validateLoginData(data);
+        const user = await User.findOne({email: data.email});
+        if (!user) {
+            throw new Error('Invalid email or password');
+        }
+        const isPasswordMatching = await bcrypt.compare(data.password, user.password);
+        if (!isPasswordMatching) {
+            throw new Error('Invalid email or password');
+        }
+        res.status(200).send('Login is successful!');
+    } catch (err) {
+        res.status(400).send(err.message);
     }
 });
