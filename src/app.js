@@ -43,12 +43,12 @@ app.post('/login', async (req, res) => {
         if (!user) {
             throw new Error('Invalid email or password');
         }
-        const isPasswordMatching = await bcrypt.compare(data.password, user.password);
+        const isPasswordMatching = await user.validatePassword(data.password);
         if (!isPasswordMatching) {
             throw new Error('Invalid email or password');
         }
 
-        const token = await jwt.sign({_id: user._id}, process.env.JWT_SIGN_PASSWORD, { expiresIn: '8h'});
+        const token = await user.getJWT();
         res.cookie(process.env.JWT_TOKEN_NAME, token, {expires: new Date(Date.now() + 8 * 3600000)});
 
         res.status(200).send('Login is successful!');

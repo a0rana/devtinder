@@ -5,7 +5,7 @@ const userAuth = async (req, res, next) => {
     try {
         const appCookie = req.cookies[process.env.JWT_TOKEN_NAME];
         if (!appCookie) {
-            throw new Error('Invalid cookie');
+            throw new Error('Please login!');
         }
         const {_id: userId} = await jwt.verify(appCookie, process.env.JWT_SIGN_PASSWORD);
         if (!userId) {
