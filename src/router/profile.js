@@ -4,7 +4,7 @@ const {userAuth} = require("../middlewares/auth");
 const {validateUpdateProfileData, validateLogoutData} = require("../util/validation");
 const bcrypt = require("bcrypt");
 
-profileRouter.get('/profile', userAuth, async (req, res) => {
+profileRouter.get('/profile/view', userAuth, async (req, res) => {
     try {
         const user = req.user;
         res.send(user);
