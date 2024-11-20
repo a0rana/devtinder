@@ -4,6 +4,7 @@ const {connectToDatabase} = require('./config/database');
 const authRouter = require('./router/auth');
 const profileRouter = require('./router/profile');
 const connectionRequestRouter = require('./router/connectionRequest');
+const userRouter = require('./router/user');
 
 const app = express();
 
@@ -23,4 +24,5 @@ app.use(cookieParser());
 app.use('/', authRouter);
 app.use('/', profileRouter);
 app.use('/', connectionRequestRouter);
+app.use('/', userRouter);
 
